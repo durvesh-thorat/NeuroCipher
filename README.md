@@ -1,4 +1,4 @@
-﻿---
+---
 title: NeuroCipher
 emoji: 🔢
 colorFrom: blue
