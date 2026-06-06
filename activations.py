@@ -1,4 +1,4 @@
-import cupy as np
+import numpy as np
 
 class ReLU:
     def forward(self, Z):
