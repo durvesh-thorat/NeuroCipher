@@ -11,5 +11,5 @@ def predict(X):
     output = model.forward(X)
     prediction = np.argmax(output)
     confidence = np.max(output)
-    print(f"Prediction: {prediction}, Confidence: {confidence:.4f}")
+    print(f"Predicted digit : {prediction}  |  Confidence : {confidence * 100:.2f}%")
     return prediction, confidence
