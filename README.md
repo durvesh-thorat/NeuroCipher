@@ -9,7 +9,7 @@ pinned: false
 ---
 # NeuroCipher
 
-**Handwritten digit recognizer built entirely from scratch â€” no ML frameworks, no PyTorch, no TensorFlow.**
+**Handwritten digit recognizer built entirely from scratch — no ML frameworks, no PyTorch, no TensorFlow.**
 
 A convolutional neural network implemented in pure NumPy, trained on MNIST to **99.36% accuracy**, with a FastAPI web interface and a Tkinter desktop GUI.
 
