@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeuroCipher</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f5f5f5;
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 340px;
+    }
+
+    h1 {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #999;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+    }
+
+    canvas {
+      display: block;
+      width: 340px;
+      height: 340px;
+      background: #fff;
+      border: 1px solid #ddd;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    button {
+      flex: 1;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.6rem;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+
+    button:hover { background: #f0f0f0; }
+
+    #predictBtn {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    #predictBtn:hover { background: #333; }
+    #predictBtn:disabled { background: #ccc; border-color: #ccc; cursor: not-allowed; }
+
+    .result {
+      margin-top: 1.25rem;
+      font-size: 0.7rem;
+      color: #999;
+      min-height: 1.2rem;
+    }
+
+    .result span {
+      color: #111;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>NeuroCipher &#8212; draw a digit</h1>
+    <canvas id="c" width="680" height="680"></canvas>
+    <div class="row">
+      <button id="clearBtn">clear</button>
+      <button id="predictBtn">predict &#8594;</button>
+    </div>
+    <div class="result" id="result">&#8212;</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    const result = document.getElementById('result');
+    const predictBtn = document.getElementById('predictBtn');
+
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 28;
+
+    let drawing = false;
+    let hasDrawn = false;
+
+    function pos(e) {
+      const r = canvas.getBoundingClientRect();
+      const sx = canvas.width / r.width;
+      const sy = canvas.height / r.height;
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: (cx - r.left) * sx, y: (cy - r.top) * sy };
+    }
+
+    canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); const p = pos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', e => { if (!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasDrawn = true; });
+    canvas.addEventListener('mouseup', () => drawing = false);
+    canvas.addEventListener('mouseleave', () => drawing = false);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = pos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasDrawn = true; });
+    canvas.addEventListener('touchend', () => drawing = false);
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      hasDrawn = false;
+      result.innerHTML = '&#8212;';
+    });
+
+    predictBtn.addEventListener('click', async () => {
+      if (!hasDrawn) return;
+      predictBtn.disabled = true;
+      result.innerHTML = 'thinking...';
+
+      const base64 = canvas.toDataURL('image/png').split(',')[1];
+
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64 })
+        });
+        const data = await res.json();
+        const digit = data['Predicted Digit'];
+        const conf = (data['Confidence'] * 100).toFixed(1);
+        result.innerHTML = `digit: <span>${digit}</span> &nbsp; confidence: <span>${conf}%</span>`;
+      } catch {
+        result.innerHTML = 'server not reachable.';
+      }
+
+      predictBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>
