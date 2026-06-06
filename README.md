@@ -1,12 +1,3 @@
----
-title: NeuroCipher
-emoji: 🔢
-colorFrom: blue
-colorTo: purple
-sdk: docker
-app_file: app.py
-pinned: false
----
 # NeuroCipher
 
 **Handwritten digit recognizer built entirely from scratch — no ML frameworks, no PyTorch, no TensorFlow.**
