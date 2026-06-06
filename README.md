@@ -1,6 +1,6 @@
 ﻿---
 title: NeuroCipher
-emoji: "1F522"
+emoji: 🔢
 colorFrom: blue
 colorTo: purple
 sdk: docker
@@ -153,4 +153,5 @@ No PyTorch. No TensorFlow. No Keras. No scikit-learn.
 ## Author
 
 **Durvesh Thorat** â€” B.Tech IT, Pillai College of Engineering, Panvel
+
 
